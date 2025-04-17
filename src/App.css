@@ -1,0 +1,23 @@
+.border-item {
+    background-color: gray;
+    width: 40vw;
+    height: auto;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+  
+.all-div{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center
+}
+
+.border-item{
+    
+    display:flex;
+    justify-content:space-between;
+
+}
