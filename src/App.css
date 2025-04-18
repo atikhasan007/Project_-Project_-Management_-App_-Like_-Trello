@@ -112,4 +112,10 @@
     overflow: auto;
   }
   
+
+  .list-container{
+      background-color:blue;
+      width : 40vw;
+      height:auto;
+  }
   

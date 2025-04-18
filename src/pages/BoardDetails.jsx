@@ -4,26 +4,34 @@ import AddItem from '../components/AddItem';
 import AddItemForm from '../components/AddItemForm';
 import { BoardContext } from '../contexts/Board';
 import { ListContext } from '../contexts/List';
+import TaskList from '../components/TaskList';
 
 const BoardDetails = () => {
   const [editMode, setEditMode] = useState(false);
-  const [listTitle, setListTitle] = useState(""); // ✅ FIXED HERE
+  const [listTitle, setListTitle] = useState("");
   const { boardId } = useParams();
   const { dispatchBoardActions } = useContext(BoardContext);
   const { lists, dispatchListActions } = useContext(ListContext);
 
-  const renderedList = lists.filter((item) => item.boardId === boardId);
+  if (!dispatchBoardActions || !dispatchListActions) {
+    console.error("Context dispatchers are undefined. Make sure your providers are wrapped around this component.");
+    return <div>Error: Missing context</div>;
+  }
+
+  const renderedLists = lists.filter((item) => item.boardId === boardId);
 
   const submitHandler = (e) => {
     e.preventDefault();
-    const id = Date.now() + "";
+    if (!listTitle.trim()) return;
+
+    const id = Date.now().toString();
 
     dispatchListActions({
       type: "CREATE_LIST",
       payload: {
-        id: id,
-        title: listTitle,
-        boardId: boardId,
+        id,
+        title: listTitle.trim(),
+        boardId,
       },
     });
 
@@ -40,29 +48,29 @@ const BoardDetails = () => {
   };
 
   return (
-    <div className='d-flex m-top-sm flex-direction-row'>
-      <Link to={'/'}>Back to Board</Link>
-      
-      <ul>
-        {renderedList.map((list) => (
-          <li key={list.id}>{list.title}</li>
-        ))}
-      </ul>
+    <div className="d-flex flex-column p-3 gap-3">
+      <Link to="/" className="btn btn-link">← Back to Boards</Link>
 
-      {!editMode ? (
-        <AddItem 
-          listAddItem={true}
-          setEditMode={setEditMode}
-        />
-      ) : (
-        <AddItemForm
-          listForm={true}
-          title={listTitle}
-          onChangeHandler={(e) => setListTitle(e.target.value)}
-          setEditMode={setEditMode}
-          submitHandler={submitHandler}
-        />
-      )}
+      <div className="d-flex flex-wrap gap-4">
+        {renderedLists.map((list) => (
+          <TaskList key={list.id} list={list} />
+        ))}
+
+        {!editMode ? (
+          <AddItem 
+            listAddItem={true}
+            setEditMode={setEditMode}
+          />
+        ) : (
+          <AddItemForm
+            listForm={true}
+            title={listTitle}
+            onChangeHandler={(e) => setListTitle(e.target.value)}
+            setEditMode={setEditMode}
+            submitHandler={submitHandler}
+          />
+        )}
+      </div>
     </div>
   );
 };
