@@ -65,7 +65,43 @@ export const listReducer = (lists = [], action) => {
             : item
         );
       }
-  
+
+      case "SORT_TASK_IDS_IN_A_LIST": {
+        const { draggableId, source, destination } = action.payload;
+      
+        return lists.map((list) => {
+          // Case 1: Moving inside the same list
+          if (source.droppableId === destination.droppableId && list.id === source.droppableId) {
+            const copyOfTasks = [...list.tasks];
+            copyOfTasks.splice(source.index, 1);
+            copyOfTasks.splice(destination.index, 0, draggableId);
+            return { ...list, tasks: copyOfTasks };
+          }
+      
+          // Case 2: Remove task from source list
+          if (source.droppableId === list.id) {
+            return {
+              ...list,
+              tasks: list.tasks.filter((taskId) => taskId !== draggableId),
+            };
+          }
+      
+          // Case 3: Add task to destination list
+          if (destination.droppableId === list.id) {
+            return {
+              ...list,
+              tasks: [
+                ...list.tasks.slice(0, destination.index),
+                draggableId,
+                ...list.tasks.slice(destination.index),
+              ],
+            };
+          }
+      
+          return list;
+        });
+      }
+      
       default: {
         return lists;
       }

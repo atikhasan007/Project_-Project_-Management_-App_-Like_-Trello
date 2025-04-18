@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import { Droppable } from 'react-beautiful-dnd';
 import { BoardContext } from '../contexts/Board';
 import { ListContext } from '../contexts/List';
 import { TaskContext } from '../contexts/Task';
@@ -22,26 +23,16 @@ const TaskList = ({ list }) => {
     });
 
     list.tasks.forEach((taskId) => {
-      dispatchTaskActions({
-        type: 'REMOVE_TASK',
-        payload: taskId,
-      });
-
+      dispatchTaskActions({ type: 'REMOVE_TASK', payload: taskId });
       dispatchBoardActions({
         type: 'REMOVE_TASK_ID_FROM_A_BOARD',
-        payload: {
-          id: list.id,
-          taskId,
-        },
+        payload: { id: list.id, taskId },
       });
     });
 
     dispatchBoardActions({
       type: 'REMOVE_LIST_ID_OF_A_BOARD',
-      payload: {
-        id: list.boardId,
-        listId: list.id,
-      },
+      payload: { id: list.boardId, listId: list.id },
     });
   };
 
@@ -79,30 +70,42 @@ const TaskList = ({ list }) => {
   };
 
   return (
-    <div className='list-container'>
-      <div className='list-title-container'>
-        <h5>{list.title}</h5>
-        <p onClick={removeHandler} className='add-item-icon'>x</p>
+    <Droppable droppableId={list.id}>
+      {(provided) => (
+        <div
+          className="list-container"
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+        >
+          <div className="list-title-container">
+            <h5>{list.title}</h5>
+            <p onClick={removeHandler} className="add-item-icon">x</p>
 
-        {list.tasks
-          .map((item) => tasks.find((ele) => ele.id === item))
-          .filter((task) => task !== undefined)
-          .map((task) => (
-            <TaskCard key={task.id} task={task} />
-          ))}
+            {list.tasks
+              .map((item) => tasks.find((ele) => ele.id === item))
+              .filter((task) => task !== undefined)
+              .map((task, index) => (
+                <TaskCard key={task.id} task={task} index={index} />
+              ))}
 
-        {!editMode ? (
-          <AddItem listAddItem={false} setEditMode={setEditMode} />
-        ) : (
-          <AddItemForm
-            title={taskTitle}
-            onChangeHandler={(e) => setTaskTitle(e.target.value)}
-            setEditMode={setEditMode}
-            submitHandler={submitHandler}
-          />
-        )}
-      </div>
-    </div>
+            {provided.placeholder}
+
+            {!editMode ? (
+              <AddItem listAddItem={false} setEditMode={setEditMode} />
+            ) : (
+              <AddItemForm
+                title={taskTitle}
+                onChangeHandler={(e) => setTaskTitle(e.target.value)}
+                setEditMode={setEditMode}
+                submitHandler={submitHandler}
+              />
+            )}
+          </div>
+          {provided.placeholder}
+        </div>
+      )}
+      
+    </Droppable>
   );
 };
 
